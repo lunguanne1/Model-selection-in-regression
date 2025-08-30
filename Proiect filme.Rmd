@@ -1,0 +1,220 @@
+---
+title: "proiect"
+author: "anne si daria"
+date: "2025-05-27"
+output: html_document
+---
+```{r}
+library(tidyverse)  
+library(readr)
+library(ggplot2)
+movies <- read_csv("C:/Users/Asus/Desktop/examen mr/Proiect/datain/movies.csv")
+movies <- na.omit(movies)
+View(movies)
+summary(movies)
+
+#numaram de cate ori apare fiecare gen de film in setul nostru de date
+genre_counts <- table(movies$Genre)
+#plotam un grafic in care vedem frecventa fiecarui gen
+plot(genre_counts,
+    col = "blue",
+    las = 2,
+    xlab = "Movie Genre",
+    ylab = "Frecventa",
+    main = "Distributia filmelor pe genuri")
+#am facut distributiile in functie de fiecare 
+hist(movies$IMDB_Rating,
+    col = "red",
+    xlab = "rating",
+    main = "Distributia filmelor in functie de rating")
+hist(movies$Meta_score,
+    col = "purple",
+    xlab = "Scor",
+    main = "Distributia filmelor in functie de scorul Meta")
+hist(movies$No_of_Votes,
+    col = "pink",
+    xlab = "Voturi",
+    main = "Distributia filmelor in functie de numarul de voturi")
+hist(movies$Gross,
+    col = "green",
+    xlab = "Castig",
+    main = "Distributia filmelor in functie de castig")
+#densitatile fiecarora  
+dens_imd <- density(movies$IMDB_Rating)
+plot(dens_imd,
+     col = "red",
+    xlab = "rating",
+    main = "Densitatea filmelor in functie de rating")
+dens_meta <- density(movies$Meta_score)
+plot(dens_meta,
+     col = "purple",
+    xlab = "Scor",
+    main = "Densitatea filmelor in functie de scorul Meta")
+dens_vot <- density(movies$No_of_Votes)
+plot(dens_vot,
+    col = "pink",
+    xlab = "Voturi",
+    main = "Densitatea filmelor in functie de numarul de voturi")
+dens_castig <- density(movies$Gross)
+plot(dens_castig,
+    col = "green",
+    xlab = "Castig",
+    main = "Densitatea filmelor in functie de castig")
+# Selectam doar coloanele numerice
+numeric_cols <- sapply(movies, is.numeric)
+#facem matricea de imprastiere
+pairs(movies[,numeric_cols], main = "Matricea diagramelor de imprastiere")
+
+#incepem cu modelele de regresie liniara simpla
+# Model simplu: IMDB_Rating in functie de Meta_score
+model_meta <- lm(IMDB_Rating~Meta_score,data=movies)
+summary(model_meta)
+
+# Reprezentare grafica a relatiei dintre Meta_score si IMDB_Rating
+ggplot(movies, aes(x = Meta_score, y = IMDB_Rating)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  theme_minimal() +
+  labs(title = "Relatia dintre scorul Metacritic si ratingul IMDb",
+       x = "Meta_score",
+       y = "IMDB_Rating")
+
+# Model simplu: IMDB_Rating in functie de No_of_Votes
+model_vot <- lm(IMDB_Rating~No_of_Votes,data=movies)
+summary(model_vot)
+
+# Reprezentare grafica a relatiei dintre numarul de voturi si IMDB_Rating
+ggplot(movies, aes(x = No_of_Votes, y = IMDB_Rating)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  theme_minimal() +
+  labs(title = "Relatia dintre numarul de voturi si ratingul IMDb",
+       x = "Numar de voturi",
+       y = "IMDB Rating")
+
+# Model simplu: IMDB_Rating in functie de Gross
+model_castig <- lm(IMDB_Rating~Gross,data=movies)
+summary(model_castig)
+
+# Reprezentare grafica a relatiei dintre castig si IMDB_Rating
+ggplot(movies, aes(x = Gross, y = IMDB_Rating)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "orange") +
+  theme_minimal() +
+  labs(title = "Relatia dintre castig si ratingul IMDb",
+       x = "Castigul",
+       y = "IMDB Rating")
+
+#incepem cu modelele de regresie liniara multipla
+# Model 1: IMDB_Rating ~ Meta_score + No_of_Votes
+# Ne intereseaza daca scorul criticilor si numarul de voturi explica ratingul IMDb
+model1 <- lm(IMDB_Rating~Meta_score+No_of_Votes,data=movies)
+summary(model1)
+#Cream o noua coloana cu valorile estimate de model
+movies$predicted1 <- predict(model1)
+#Vizualizam valorile estimate vs cele reale
+ggplot(movies, aes(x = predicted1, y = IMDB_Rating)) +
+  geom_point() +
+  geom_abline( color = "green") +
+  theme_minimal() +
+  labs(title = "Comparatia dintre valorile estimate si cele reale ale ratingului IMDb",
+       x = "Rating estimat",
+       y = "Rating IMDb")
+
+# Model 2: IMDB_Rating ~ Meta_score + Gross
+# Verificam daca Meta_score si incasarile explica ratingul IMDb
+model2 <- lm(IMDB_Rating~Meta_score+Gross,data=movies)
+summary(model2)
+movies$predicted2 <- predict(model2)
+#Vizualizam valorile estimate vs rating
+ggplot(movies, aes(x = predicted2, y = IMDB_Rating)) +
+  geom_point() +
+  geom_abline( color = "blue") +
+  theme_minimal() +
+  labs(title = "Comparatia dintre valorile estimate si cele reale ale ratingului IMDb",
+       x = "Rating estimat",
+       y = "Rating IMDb")
+
+# Model 3: IMDB_Rating ~ No_of_Votes + Gross
+# Testam daca voturile si castigul explica ratingul IMDb
+model3 <- lm(IMDB_Rating~No_of_Votes+Gross,data=movies)
+summary(model3)
+movies$predicted3 <- predict(model3)
+#Vizualizam valorile estimate vs rating
+ggplot(movies, aes(x = predicted3, y = IMDB_Rating)) +
+  geom_point() +
+  geom_abline(color = "pink") +
+  theme_minimal() +
+  labs(title = "Comparatia dintre valorile estimate si cele reale ale ratingului IMDb",
+       x = "Rating estimat",
+       y = "Rating IMDb")
+
+# Model 4: IMDB_Rating ~ Meta_score + No_of_Votes + Gross
+# Combinam toti cei trei predictori pentru un model complet
+model4 <- lm(IMDB_Rating~Meta_score+No_of_Votes+Gross,data=movies)
+summary(model4)
+movies$predicted4 <- predict(model4)
+#Vizualizam valorile estimate vs rating
+ggplot(movies, aes(x = predicted4, y = IMDB_Rating)) +
+  geom_point() +
+  geom_abline( color = "black") +
+  theme_minimal() +
+  labs(title = "Comparatia dintre valorile estimate si cele reale ale ratingului IMDb",
+       x = "Rating estimat",
+       y = "Rating IMDb")
+
+#Am adaugat modele cu interactie
+
+#Model_inter_1: IMDB_Rating~Meta_score*Gross*No_of_Votes
+# Modelul include toate interactiunile posibile intre Meta_score, Gross si No_of_Votes.
+# Scopul este sa investigam daca efectul oricarui predictor depinde de ceilalti doi.
+model_inter_1 <- lm(IMDB_Rating~Meta_score*Gross*No_of_Votes,data=movies)
+summary(model_inter_1)
+movies$predicted_int_1 <- predict(model_inter_1)
+ggplot(movies, aes(x = predicted_int_1, y = IMDB_Rating)) +
+  geom_point() +
+  geom_abline( color = "forestgreen") +
+  theme_minimal() +
+  labs(title = "Comparatia dintre valorile estimate si cele reale ale ratingului IMDb",
+       x = "Rating estimat",
+       y = "Rating IMDb")
+
+#Model_inter_2: IMDB_Rating~Gross*No_of_Votes
+# Includem un termen de interactiune intre No_of_Votes si Gross pentru a examina
+# daca efectul Gross asupra ratingului IMDb depinde de numarul de voturi.
+model_inter_2 <- lm(IMDB_Rating~Gross*No_of_Votes,data=movies)
+summary(model_inter_2)
+movies$predicted_int_2 <- predict(model_inter_2)
+ggplot(movies, aes(x = predicted_int_2, y = IMDB_Rating)) +
+  geom_point() +
+  geom_abline( color = "lightblue") +
+  theme_minimal() +
+  labs(title = "Comparatia dintre valorile estimate si cele reale ale ratingului IMDb",
+       x = "Rating estimat",
+       y = "Rating IMDb")
+
+#Model_inter_3: IMDB_Rating~Meta_score*No_of_Votes
+# Includem un termen de interactiune intre Meta_score si No_of_Votes pentru a examina
+# daca efectul Meta_score asupra ratingului IMDb depinde de numarul de voturi.
+model_inter_3 <- lm(IMDB_Rating~Meta_score*No_of_Votes,data=movies)
+summary(model_inter_3)
+movies$predicted_int_3 <- predict(model_inter_3)
+ggplot(movies, aes(x = predicted_int_3, y = IMDB_Rating)) +
+  geom_point() +
+  geom_abline( color = "hotpink") +
+  theme_minimal() +
+  labs(title = "Comparatia dintre valorile estimate si cele reale ale ratingului IMDb",
+       x = "Rating estimat",
+       y = "Rating IMDb")
+
+
+# Comparam toate modelele construite folosind criteriul AIC.
+# AIC evalueaza performanta modelului 
+# Modelele cu AIC mai mic sunt preferabile
+AIC(model_meta,model_castig,model_vot,model1,model2,model3,model4,model_inter_1,model_inter_2,model_inter_3)
+# Comparam toate modelele folosind criteriul BIC
+# Cel mai mic BIC indica modelul optim 
+BIC(model_meta,model_castig,model_vot,model1,model2,model3,model4,model_inter_1,model_inter_2,model_inter_3)
+```       
+
+
