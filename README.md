@@ -4,8 +4,8 @@ This repository contains a project for the **Regression Models** course (2025), 
 The main goal is to analyze the factors that influence a movie’s popularity and to evaluate which regression models best explain IMDb ratings.
 
 ## Authors
-- Daria Cristiana Țăranu (Group 321)  
-- Anne-Marie Lungu (Group 321)  
+- Daria Cristiana Țăranu 
+- Anne-Marie Lungu  
 
 ## Contents
 - `Proiect filme.Rmd` – R Markdown file with code, analysis, and visualizations  
